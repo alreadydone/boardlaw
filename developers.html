@@ -1,0 +1,278 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Developer Guide &#8212; boardlaw 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="boardlaw" href="index.html" />
+
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+    <!-- Monitoring pageviews is really useful to me to see what kind of stuff I've done is useful to everyone else.
+    But I'm keen to not to track any more than that, and so this is a minimal, self-hosted solution. It records
+    nothing more than'd be in the server logs. -->
+    <script>
+        url = "https://live.andyljones.com/mat/mat.php";
+        xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  
+        params = 'idsite=1&rec=1'
+        params += '&url=' + encodeURIComponent(window.location.href);
+        params += '&urlref=' + encodeURIComponent(document.referrer);
+        params += '&rand=' + Math.floor(16384*Math.random())
+        xhr.send(params)
+      </script>
+      <noscript>
+        <img src="https://live.andyljones.com/mat/mat.php?idsite=1&amp;rec=1" style="border:0" alt=""/>
+      </noscript>
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">boardlaw</a></h1>
+
+
+
+<p class="blurb">multiagent scaling laws</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=andyljones&repo=boardlaw&type=star&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#open-issues">Open Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#workflow">Workflow</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="index.html" title="previous chapter">boardlaw</a></li>
+  </ul></li>
+</ul>
+</div>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="developer-guide">
+<h1>Developer Guide<a class="headerlink" href="#developer-guide" title="Permalink to this headline">¶</a></h1>
+<p>So far boardlaw’s a <a class="reference external" href="https://andyljones.com">one-man project</a>, but I’m keen to change that. If you think it’s an
+interesting research direction and you’d like to help out, drop by the <a class="reference external" href="https://discord.gg/xhfNqQv">RL</a> or <a class="reference external" href="https://discord.gg/K8xcydxcka">EAI</a> Discords and give <strong>&#64;andyljones</strong> ping! I’m usually active London daytime. Slightly
+more formally, you can post an issue on the tracker, or <a class="reference external" href="mailto:me&#37;&#52;&#48;andyljones&#46;com">give me an email</a>.</p>
+<div class="section" id="open-issues">
+<h2>Open Issues<a class="headerlink" href="#open-issues" title="Permalink to this headline">¶</a></h2>
+<p>There’s a list of issues <a class="reference external" href="https://github.com/andyljones/boardlaw/issues">on the tracker</a>. These are all pretty
+high-level, but they’re not exhaustive - if there’s a new direction you’d like to take things in, I’m very much
+open to suggestions.</p>
+<p>One thing I’d advise against though is putting together a PR without chatting to me first: this is a research repo and
+large chunks of it can change dramatically and unexpectedly. I don’t want to have to tell anyone that their work depends
+recently-obsolete code.</p>
+</div>
+<div class="section" id="workflow">
+<h2>Workflow<a class="headerlink" href="#workflow" title="Permalink to this headline">¶</a></h2>
+<p>Below is a step-by-step guide to replicating my workflow. Since I’m very keen on my workflow
+working, copying it exactly is the best way to get a workflow that works yourself. If you want to adapt your <em>own</em>
+workflow to boardlaw, these same steps should contain all the miscellaneous information you need.</p>
+<div class="section" id="prelude">
+<h3>Prelude<a class="headerlink" href="#prelude" title="Permalink to this headline">¶</a></h3>
+<p>My workflow uses vscode for editing, Jupyter for interaction, and Docker for reproducibility, and it all sits on a remote
+GPU-equipped server. To replicate my that, you’ll need</p>
+<ul class="simple">
+<li><p>a server with a GPU that <a class="reference external" href="https://en.wikipedia.org/wiki/CUDA#GPUs_supported">has compute capability 7.5 or above</a>
+and at least ~6GB of memory</p></li>
+<li><p>NVIDIA drivers 460.32.03 or above</p></li>
+<li><p>both Docker and the <a class="reference external" href="https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#docker">NVIDIA container toolkit</a></p></li>
+</ul>
+<p>To test that you’ve got all of this right, you should be able to run</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="n">pytorch</span><span class="o">/</span><span class="n">pytorch</span><span class="p">:</span><span class="mf">1.7</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">cuda11</span><span class="o">.</span><span class="mi">0</span><span class="o">-</span><span class="n">cudnn8</span><span class="o">-</span><span class="n">devel</span> <span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;import torch; print(torch.tensor(1).cuda())&quot;</span>
+</pre></div>
+</div>
+<p>This is the most basic exercise of PyTorch and CUDA possible, and it should print out <code class="docutils literal notranslate"><span class="pre">torch.tensor(1)</span></code>.</p>
+</div>
+<div class="section" id="setup">
+<h3>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h3>
+<p>First, clone the repo into a local dir.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">andyljones</span><span class="o">/</span><span class="n">boardlaw</span><span class="o">.</span><span class="n">git</span>
+</pre></div>
+</div>
+<p>Then pull and run the <a class="reference external" href="https://github.com/andyljones/boardlaw/tree/master/docker">boardlaw image</a>. Run this command, substituting the dir you just cloned the
+repo into as $CODE_DIR. In my case, that’s <code class="docutils literal notranslate"><span class="pre">/home/ajones/code/boardlaw</span></code>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">pull</span> <span class="n">andyljones</span><span class="o">/</span><span class="n">boardlaw</span>
+<span class="n">docker</span> <span class="n">run</span> <span class="o">--</span><span class="n">name</span> <span class="n">boardlaw</span> <span class="o">--</span><span class="n">shm</span><span class="o">-</span><span class="n">size</span><span class="o">=</span><span class="s2">&quot;16g&quot;</span> <span class="o">-</span><span class="n">v</span> <span class="n">CODE_DIR</span><span class="p">:</span><span class="o">/</span><span class="n">code</span> <span class="n">andyljones</span><span class="o">/</span><span class="n">boardlaw</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+<p>For completeness, the switches are</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--name</span> <span class="pre">boardlaw</span></code>, so you can refer to the container as <code class="docutils literal notranslate"><span class="pre">boardlaw</span></code> in docker commands rather than whatever random
+phrase docker comes up with.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--shm-size</span></code>, to up the shared memory size. The default 64MB can upset PyTorch’s IPC.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-v</span></code>, to mount the dir you cloned the repo into as <code class="docutils literal notranslate"><span class="pre">/code</span></code> inside the Docker container.</p></li>
+</ul>
+<p>The above is the short version of the command, which will keep the container in the foreground of your terminal
+session so you can easily see if anything goes wrong. Typically I run the container with the much longer command</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> \
+    <span class="o">--</span><span class="n">name</span> <span class="n">boardlaw</span> \
+    <span class="o">--</span><span class="n">shm</span><span class="o">-</span><span class="n">size</span><span class="o">=</span><span class="s2">&quot;16g&quot;</span> \
+    <span class="o">-</span><span class="n">v</span> <span class="n">CODE_DIR</span><span class="p">:</span><span class="o">/</span><span class="n">code</span> \
+    <span class="o">-</span><span class="n">p</span> <span class="mi">35022</span><span class="p">:</span><span class="mi">22</span> \
+    <span class="o">--</span><span class="n">cap</span><span class="o">-</span><span class="n">add</span> <span class="n">SYS_ADMIN</span> \
+    <span class="o">--</span><span class="n">cap</span><span class="o">-</span><span class="n">add</span><span class="o">=</span><span class="n">SYS_PTRACE</span> \
+    <span class="o">--</span><span class="n">security</span><span class="o">-</span><span class="n">opt</span> <span class="n">apparmor</span><span class="o">=</span><span class="n">unconfined</span> \
+    <span class="o">--</span><span class="n">security</span><span class="o">-</span><span class="n">opt</span> <span class="n">seccomp</span><span class="o">=</span><span class="n">unconfined</span> \
+    <span class="n">andyljones</span><span class="o">/</span><span class="n">boardlaw</span><span class="p">:</span><span class="n">latest</span>
+</pre></div>
+</div>
+<p>which additionally has</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-d</span></code> to detach it and run it in the background. You can get the logs with <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">logs</span> <span class="pre">boardlaw</span></code> if you need to.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-p</span> <span class="pre">35022:22</span></code> to open port 22 so that <code class="docutils literal notranslate"><span class="pre">nsys-systems</span></code> profiler can attach remotely</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--cap-add</span></code>, <code class="docutils literal notranslate"><span class="pre">--security-opt</span></code> so that various debugging tools like <code class="docutils literal notranslate"><span class="pre">compute-sanitizer</span></code> work properly.</p></li>
+</ul>
+<p>But don’t worry about the long command for now; just use the short one.</p>
+<p>Once the container is running, you can check its status with <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">container</span> <span class="pre">ls</span></code>, and you can open up a terminal
+in it with <code class="docutils literal notranslate"><span class="pre">docker</span> <span class="pre">exec</span> <span class="pre">-it</span> <span class="pre">boardlaw</span> <span class="pre">/bin/bash</span></code>.</p>
+<p>To check everything’s working, use</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">boardlaw</span> <span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;import torch; print(torch.tensor(1).cuda())&quot;</span>
+</pre></div>
+</div>
+<p>to test PyTorch generally, and</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">docker</span> <span class="n">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">boardlaw</span> <span class="n">python</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;from boardlaw import *&quot;</span>
+</pre></div>
+</div>
+<p>to test that boardlaw can be imported.</p>
+</div>
+<div class="section" id="editor">
+<h3>Editor<a class="headerlink" href="#editor" title="Permalink to this headline">¶</a></h3>
+<p>At this point you’ve got a copy of the boardlaw container up and running, all we’ve gotta do now is hook the dev tools up!</p>
+<p>Personally, I use <a class="reference external" href="https://code.visualstudio.com/">vscode</a> and its superb <a class="reference external" href="https://code.visualstudio.com/docs/remote/remote-overview">remote support</a>. You can open up a vscode instance and manually connect to
+the container using the <code class="docutils literal notranslate"><span class="pre">Remote</span> <span class="pre">Container:</span> <span class="pre">Attach</span> <span class="pre">to</span> <span class="pre">Running</span> <span class="pre">Container</span></code> command, but what’s easier is <a class="reference external" href="https://github.com/microsoft/vscode-remote-release/issues/2133#issuecomment-618328138">this bit of
+magic</a>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>DOCKER_HOST=ssh://SERVER_HOSTNAME
+uri=$(python -c &quot;import json; desc = json.dumps({&#39;containerName&#39;: &#39;/boardlaw&#39;, &#39;settings&#39;: {&#39;host&#39;:&#39;$DOCKER_HOST&#39;}}); print(f&#39;vscode-remote://attached-container+{desc.encode().hex()}/code&#39;)&quot;)
+code --folder-uri &quot;$uri&quot;
+</pre></div>
+</div>
+<p>Either way, you’ll end up with a vscode instance running directly in the container, and from here you should be able to
+edit files and run code from the built-in terminal.</p>
+</div>
+<div class="section" id="jupyter">
+<h3>Jupyter<a class="headerlink" href="#jupyter" title="Permalink to this headline">¶</a></h3>
+<p>Finally, if you go to the ‘Remote Explorer’ tag of vscode and forward a port on 5000, you’ll be able to access the
+Jupyter instance that comes with the container. Navigate to</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">http</span><span class="p">:</span><span class="o">//</span><span class="n">localhost</span><span class="p">:</span><span class="mi">5000</span><span class="o">/</span><span class="n">notebooks</span><span class="o">/</span><span class="n">main</span><span class="o">.</span><span class="n">ipynb</span>
+</pre></div>
+</div>
+<p>in your browser and you should get a shiny Jupyter notebook!</p>
+<p>You can also do this step by manually setting up a tunnel with <code class="docutils literal notranslate"><span class="pre">ssh</span> <span class="pre">-L</span></code>, but believe you me when I say it’s easier
+with vscode.</p>
+<p>While you’re doing this, another useful port to forward is 8083, for <a class="reference external" href="https://jiffyclub.github.io/snakeviz/#interpreting-results">snakeviz</a> support.</p>
+<p>Some things worth noting about boardlaw’s instance of Jupyter:</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://ipython.org/ipython-doc/3/config/extensions/autoreload.html">autoreload</a> is automatically enabled.
+Autoreload means that if you run <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">boardlaw.main</span> <span class="pre">import</span> <span class="pre">*</span></code> in Jupyter, then go and change the code in the
+<code class="docutils literal notranslate"><span class="pre">boardlaw/main.py</span></code> file, those changes will be instantly reflected in Jupyter.</p>
+<ul>
+<li><p>One thing to be aware of is that it won’t re-run code that was run on module import/object creation/etc. So if,
+f’example, you change a decorated function then that won’t be updated without an explicit <code class="docutils literal notranslate"><span class="pre">importlib.reload</span></code>
+or (more easily) a re-start of the kernel.</p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://github.com/andyljones/stripcommon">stripcommon</a> is automatically enabled. This strips leading whitespace
+from blocks of code you copy-paste into Jupyter, which is supremely useful when copy-paste code from vscode over.</p></li>
+<li><p><a class="reference external" href="https://github.com/andyljones/noterminal">noterminal</a> is automatically enabled. This lets you launch new,
+‘temporary’ notebooks with <code class="docutils literal notranslate"><span class="pre">tt</span></code>, and then destroy those notebooks with <code class="docutils literal notranslate"><span class="pre">tq</span></code>. This is useful for creating a new
+notebook to watch your runs from.</p></li>
+<li><p>You can interrupt the kernel with <code class="docutils literal notranslate"><span class="pre">ii</span></code>. You can restart the kernel by hitting <code class="docutils literal notranslate"><span class="pre">00</span></code>. You’ll do this a lot.</p></li>
+</ul>
+</div>
+<div class="section" id="running-code">
+<h3>Running Code<a class="headerlink" href="#running-code" title="Permalink to this headline">¶</a></h3>
+<p>With all that set up, you should be able to run</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">boardlaw.main</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">run</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>in a notebook to launch a run. After a few seconds (maybe a little longer the first time as it compiles kernels) it’ll
+respond with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">2021</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">20</span> <span class="mi">11</span><span class="p">:</span><span class="mi">26</span><span class="p">:</span><span class="mi">54</span> <span class="n">INFO</span> <span class="n">pavlov</span><span class="o">.</span><span class="n">runs</span><span class="p">:</span> <span class="n">Created</span> <span class="n">run</span> <span class="mi">2021</span><span class="o">-</span><span class="mi">01</span><span class="o">-</span><span class="mi">20</span> <span class="mi">11</span><span class="o">-</span><span class="mi">26</span><span class="o">-</span><span class="mi">54</span> <span class="n">neat</span><span class="o">-</span><span class="n">funds</span>
+</pre></div>
+</div>
+<p>The bit after <code class="docutils literal notranslate"><span class="pre">run</span></code> is the name of the run. Once you’ve seen this message, you can watch its progress from a
+second Jupyter instance (<code class="docutils literal notranslate"><span class="pre">tt</span></code>) with</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pavlov</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">monitor</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/monitor.png"><img alt="A plot of the monitoring of a live run" src="_images/monitor.png" style="width: 640px;" /></a>
+<p>The <code class="docutils literal notranslate"><span class="pre">-1</span></code> is interpreted as ‘the latest run’. You could equally sub in a full run name, or a glob - the run launched
+above could also be retrieved with <code class="docutils literal notranslate"><span class="pre">monitor('*neat-funds')</span></code> .</p>
+<p>To get plots, use</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pavlov</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">stats</span><span class="o">.</span><span class="n">review</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div>
+</div>
+<a class="reference internal image-reference" href="_images/review.png"><img alt="A plot of the plots of a live run" src="_images/review.png" style="width: 640px;" /></a>
+<p>or <code class="docutils literal notranslate"><span class="pre">stats.view(-1)</span></code> for live plots.</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2020, Andy L. Jones.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/developers.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

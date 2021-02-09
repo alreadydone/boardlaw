@@ -1,0 +1,177 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>boardlaw &#8212; boardlaw 0.1 documentation</title>
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Developer Guide" href="developers.html" />
+
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+    <!-- Monitoring pageviews is really useful to me to see what kind of stuff I've done is useful to everyone else.
+    But I'm keen to not to track any more than that, and so this is a minimal, self-hosted solution. It records
+    nothing more than'd be in the server logs. -->
+    <script>
+        url = "https://live.andyljones.com/mat/mat.php";
+        xhr = new XMLHttpRequest();
+        xhr.open("POST", url, true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+  
+        params = 'idsite=1&rec=1'
+        params += '&url=' + encodeURIComponent(window.location.href);
+        params += '&urlref=' + encodeURIComponent(document.referrer);
+        params += '&rand=' + Math.floor(16384*Math.random())
+        xhr.send(params)
+      </script>
+      <noscript>
+        <img src="https://live.andyljones.com/mat/mat.php?idsite=1&amp;rec=1" style="border:0" alt=""/>
+      </noscript>
+
+  </head><body>
+  <div class="document">
+    
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">boardlaw</a></h1>
+
+
+
+<p class="blurb">multiagent scaling laws</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=andyljones&repo=boardlaw&type=star&count=False&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Guide</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+      <li>Next: <a href="developers.html" title="next chapter">Developer Guide</a></li>
+  </ul></li>
+</ul>
+</div>
+        </div>
+      </div>
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="boardlaw">
+<h1>boardlaw<a class="headerlink" href="#boardlaw" title="Permalink to this headline">¶</a></h1>
+<p><strong>boardlaw</strong> is an ongoing research project into <a class="reference external" href="https://docs.google.com/document/d/1OwniAl1ocnqKHc4jtPVJzemm46q6ZgPVhXhmL2ZDIJw/edit">scaling laws in multiagent systems</a>,
+as supported by <a class="reference external" href="http://survivalandflourishing.org/">Survival and Flourishing</a>.</p>
+<div class="section" id="alphazero-implementation">
+<h2>AlphaZero Implementation<a class="headerlink" href="#alphazero-implementation" title="Permalink to this headline">¶</a></h2>
+<p>Part of this project is a fast, low-resource AlphaZero implementation for small board games. Right now it can
+solve 9x9 <a class="reference external" href="http://www.mseymour.ca/hex_book/hexstrat0.html">Hex</a> to perfect play in ~4 hours on a single RTX 2080 Ti.</p>
+<a class="reference internal image-reference" href="_images/boardlaw-scaling.png"><img alt="A plot of time-till-perfect-play against board size" src="_images/boardlaw-scaling.png" style="width: 640px;" /></a>
+<p>‘Perfect play’ is judged by ‘being on-par with <a class="reference external" href="https://github.com/cgao3/benzene-vanilla-cmake">MoHex</a>’, which claims
+perfect play on boards up to size 9x9.</p>
+<p>Because of the low-resource constraint, this implementation does a few things unusually:</p>
+<ul class="simple">
+<li><p>The game - Hex - is vectorized and stepped <a class="reference external" href="https://github.com/andyljones/boardlaw/tree/master/boardlaw/hex/cpp/kernels.cu">entirely on the GPU</a>. Playing
+random actions, the throughput is ~100m boards/second on a 16k vectorization. This is high enough that it forms a
+negligible part of the run time, even with very small networks.</p></li>
+<li><p>The MCTS is vectorized and carried out <a class="reference external" href="https://github.com/andyljones/boardlaw/tree/master/boardlaw/mcts/cpp/kernels.cu">entirely on the GPU</a> too.</p></li>
+<li><p>It leverages <a class="reference external" href="https://github.com/andyljones/boardlaw/tree/master/https://arxiv.org/abs/2007.12509">Monte-Carlo Tree Search as Regularized Policy Optimization</a>
+to get away with doing ~64 sims compared to the usual ~800. It also subs out the bisection search recommended in the
+paper for a Newton solver, which is much faster.</p></li>
+<li><p>It uses a minimal replay buffer of 64 steps, as repeated samples are bad for training speed
+(<a class="reference external" href="https://arxiv.org/pdf/1912.06680.pdf">p55, 57</a>)</p></li>
+<li><p>It uses fully-connected resnets, as convnets seem to be overkill for boards this small.</p></li>
+<li><p>It uses <a class="reference external" href="https://arxiv.org/abs/2003.04887">ReZero</a> initialization to skip out on (slow, annoying) layernorms
+and batchnorms.</p></li>
+<li><p>It uses a very small <code class="docutils literal notranslate"><span class="pre">c_puct</span></code> of 1/16. This turned out to be unexpectedly critical; I don’t know whether it’s a
+consequence of the MCTS-as-regularized-tree-search, or if it reflects some other mistaken calculation elsewhere in my
+implementation.</p></li>
+</ul>
+<p>There are intentionally no game-specific features: this is all intended as a tool for exploring the power of generic
+machine learning systems.</p>
+<p>A lot of this is un-ablated as of mid-Jan, so take it with a pinch of salt when deciding where to attribute performance to.</p>
+</div>
+<div class="section" id="activeelo">
+<span id="activelo"></span><h2>ActiveElo<a class="headerlink" href="#activeelo" title="Permalink to this headline">¶</a></h2>
+<p>One frustration in writing this was in figuring out what pairs of agents should play against eachother to most rapidly
+nail down the Elo of a new agent. I eventually cracked and wrote <a class="reference external" href="https://github.com/andyljones/boardlaw/tree/master/activelo">activelo</a> which uses a variational Bayes
+approach to suggest, based on the games played so far, which pair should be played next. It’s built using the superb
+<a class="reference external" href="https://github.com/Lezcano/geotorch">geotorch</a> constrained optimization toolkit.</p>
+</div>
+<div class="section" id="citations">
+<h2>Citations<a class="headerlink" href="#citations" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-bib notranslate"><div class="highlight"><pre><span></span><span class="nc">@software</span><span class="p">{</span><span class="nl">boardlaw</span><span class="p">,</span>
+    <span class="na">author</span> <span class="p">=</span> <span class="s">{{Andy L Jones}}</span><span class="p">,</span>
+    <span class="na">title</span> <span class="p">=</span> <span class="s">{boardlaw}</span><span class="p">,</span>
+    <span class="na">url</span> <span class="p">=</span> <span class="s">{https://www.github.com/andyljones/boardlaw}</span><span class="p">,</span>
+    <span class="na">version</span> <span class="p">=</span> <span class="s">{0.0}</span><span class="p">,</span>
+    <span class="na">date</span> <span class="p">=</span> <span class="s">{2021-01-20}</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="index">
+<h2>Index<a class="headerlink" href="#index" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="developers.html">Developer Guide</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="developers.html#open-issues">Open Issues</a></li>
+<li class="toctree-l2"><a class="reference internal" href="developers.html#workflow">Workflow</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+    <div class="clearer"></div>
+  </div>
+    <div class="footer">
+      &copy;2020, Andy L. Jones.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 3.4.3</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
